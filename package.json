@@ -1,0 +1,20 @@
+{
+  "name": "staticsitegenerator",
+  "version": "1.0.0",
+  "description": "Static Site generator\r article: https://arne.me/articles/write-your-own-ssg",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "exec": "node dist/index.js",
+    "buildexec": "tsc && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2"
+  }
+}
