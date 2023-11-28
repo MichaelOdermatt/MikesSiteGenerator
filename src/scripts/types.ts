@@ -8,3 +8,8 @@ export interface MarkdownFile {
     body: string;
     metadata: MetadataEntry[];
 }
+
+export interface SubstringLocation {
+    searchString: string | RegExp;
+    index: number;
+}
