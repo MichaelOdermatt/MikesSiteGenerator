@@ -2,6 +2,7 @@
 title: Example Page
 ---
 
+## Header Title
 Important text.
 This is an example page. Page content goes here...
 

@@ -1,4 +1,4 @@
-import { CLEAN_METADATA_REGEX, DOUBLE_LINE_BREAK_REGEX, HTML_CLOSING_TAG_REGEX } from './regex.js';
+import { CLEAN_METADATA_REGEX, DOUBLE_LINE_BREAK_REGEX, HEADER_LINE_REGEX, HTML_CLOSING_TAG_REGEX } from './regex.js';
 import StringHelpers from './stringHelpers.js';
 import { MetadataEntry } from './types.js';
 
@@ -33,6 +33,24 @@ export default class ParseMarkdown {
     }
 
     /**
+     * Translates a string from Markdown header format to HTML header format.
+     * @param line The input string to be translated.
+     * @returns Returns the HTML header if the input was a Markdown header,
+     * otherwise returns the original string.
+     */
+    public static attemptToTranslateHeader(line: string) {
+        if (!HEADER_LINE_REGEX.test(line)) {
+            return line;
+        }
+
+        const words = line.split(' ');
+        const headerSize = words[0].length;
+        const headerContent = line.substring(headerSize + 1);
+
+        return `<h${headerSize}>${headerContent}</h${headerSize}>`
+    }
+
+    /**
      * Converts the content of the file into HTML paragraph elements, excluding any HTML 
      * elements encountered in the file content from being encapsulated within a paragraph element.
      * @param content The content of the HTML file.
@@ -41,6 +59,10 @@ export default class ParseMarkdown {
     public static convertContentToHTML(content: string): string {
         content = content.trim();
         let output = '';
+
+        let lines = content.split('\n');
+        lines = lines.map(line => ParseMarkdown.attemptToTranslateHeader(line));
+        content = lines.join('\n');
 
         while (content != '') {
             // Search the string for anything that denotes the end of a paragraph block.
