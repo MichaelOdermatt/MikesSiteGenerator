@@ -1,2 +1,2 @@
-# StaticSiteGenerator
+# Mike's Site Generator
  

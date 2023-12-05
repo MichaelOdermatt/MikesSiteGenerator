@@ -1,5 +1,5 @@
 {
-  "name": "staticsitegenerator",
+  "name": "MikesSiteGenerator",
   "version": "1.0.0",
   "description": "Static Site generator\r article: https://arne.me/articles/write-your-own-ssg",
   "main": "index.ts",
