@@ -16,5 +16,4 @@ All the markdown parsing is done by the script and so, is only intended to suppo
 
 ## What else am I interested in adding?
 
-- CLI support. So that the script can be run from the command line.
 - Support for a few more markdown elements.
