@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import ParseMarkdown from './parseMarkdown.js';
-import { MARKDOWN_REGEX, METADATA_REGEX } from './regex.js';
+import { MARKDOWN_FILE_NAME_REGEX, METADATA_REGEX } from './regex.js';
 const OUTPUT_DIRECTORY = './_site';
 const MARKDOWN_DIRECTORY = './markdown';
 const TEMPLATE_PATH = './src/base.html';
@@ -12,27 +12,23 @@ const TEMPLATE_TITLE_KEY = '{{ title }}';
  * @param directoryPath The directory path that we wish to search.
  */
 function retreiveMarkdownFiles(directoryPath) {
-    return new Promise((resolve, reject) => {
-        fs.readdir(directoryPath, (err, files) => {
-            if (err) {
-                reject(err);
-            }
-            const fileNames = files.filter(file => file.match(MARKDOWN_REGEX));
-            const markdownFiles = fileNames.map((fileName) => {
-                // Read the file content and seperate the metadata and body sections into their 
-                // own strings.
-                const fileContent = fs.readFileSync(path.join(directoryPath, fileName), 'utf-8');
-                const body = fileContent.replace(METADATA_REGEX, '');
-                const rawMetadata = fileContent.match(METADATA_REGEX)[0];
-                return {
-                    fileName: fileName.replace(MARKDOWN_REGEX, ''),
-                    body: ParseMarkdown.convertContentToHTML(body),
-                    metadata: ParseMarkdown.getValuesFromMetadata(rawMetadata)
-                };
-            });
-            resolve(markdownFiles);
+    const allFileNames = fs.readdirSync(directoryPath);
+    const markdownFileNames = allFileNames.filter(file => file.match(MARKDOWN_FILE_NAME_REGEX));
+    const markdownFiles = [];
+    const processMarkdownFile = (fileName) => {
+        // Read the file content and seperate the metadata and body sections into their 
+        // own strings.
+        const fileContent = fs.readFileSync(path.join(directoryPath, fileName), 'utf-8');
+        const body = fileContent.replace(METADATA_REGEX, '');
+        const rawMetadata = fileContent.match(METADATA_REGEX)[0];
+        markdownFiles.push({
+            fileName: fileName.replace(MARKDOWN_FILE_NAME_REGEX, ''),
+            body: ParseMarkdown.convertContentToHTML(body),
+            metadata: ParseMarkdown.getValuesFromMetadata(rawMetadata)
         });
-    });
+    };
+    markdownFileNames.forEach(processMarkdownFile);
+    return markdownFiles;
 }
 /**
  * Creates an html file from the given markdown file in the given output directory.
@@ -56,7 +52,7 @@ function createHTMLFile(fileName, content, outputDir) {
  * @param metadata The metadata for the HTML template.
  * @returns The filled out HTML template.
  */
-async function insertIntoHTMLTemplate(body, metadata) {
+function insertIntoHTMLTemplate(body, metadata) {
     let templateContent = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
     templateContent = templateContent.replace(TEMPLATE_BODY_KEY, body);
     // Add title to the html template if there is a title included in the metadata.
@@ -71,9 +67,9 @@ async function insertIntoHTMLTemplate(body, metadata) {
  * html files in the output directory.
  */
 async function generate() {
-    const markdownFiles = await retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
+    const markdownFiles = retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
     markdownFiles.forEach(async (file) => {
-        const htmlContent = await insertIntoHTMLTemplate(file.body, file.metadata);
+        const htmlContent = insertIntoHTMLTemplate(file.body, file.metadata);
         createHTMLFile(file.fileName, htmlContent, OUTPUT_DIRECTORY);
     });
 }

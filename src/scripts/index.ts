@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { MetadataEntry, MarkdownFile } from './types.js';
 import ParseMarkdown from './parseMarkdown.js';
-import { MARKDOWN_REGEX, METADATA_REGEX } from './regex.js';
+import { MARKDOWN_FILE_NAME_REGEX, METADATA_REGEX } from './regex.js';
 
 const OUTPUT_DIRECTORY = './_site';
 const MARKDOWN_DIRECTORY = './markdown';
@@ -14,31 +14,29 @@ const TEMPLATE_TITLE_KEY = '{{ title }}';
  * Returns markdownFile for all the markdown files in the given directory.
  * @param directoryPath The directory path that we wish to search.
  */
-function retreiveMarkdownFiles(directoryPath: string): Promise<MarkdownFile[]> {
-    return new Promise((resolve, reject) => {
-        fs.readdir(directoryPath, (err: any, files: string[]) => {
-            if (err) {
-                reject(err);
-            }
+function retreiveMarkdownFiles(directoryPath: string): MarkdownFile[] {
+    const allFileNames = fs.readdirSync(directoryPath);
 
-            const fileNames = files.filter(file => file.match(MARKDOWN_REGEX));
-            const markdownFiles = fileNames.map((fileName: string): MarkdownFile => {
-                // Read the file content and seperate the metadata and body sections into their 
-                // own strings.
-                const fileContent = fs.readFileSync(path.join(directoryPath, fileName), 'utf-8');
-                const body = fileContent.replace(METADATA_REGEX, '');
-                const rawMetadata = fileContent.match(METADATA_REGEX)[0];
+    const markdownFileNames = allFileNames.filter(file => file.match(MARKDOWN_FILE_NAME_REGEX));
+    const markdownFiles: MarkdownFile[] = [];
 
-                return {
-                    fileName: fileName.replace(MARKDOWN_REGEX, ''),
-                    body: ParseMarkdown.convertContentToHTML(body),
-                    metadata: ParseMarkdown.getValuesFromMetadata(rawMetadata)
-                }
-            });
-            
-            resolve(markdownFiles);
+    const processMarkdownFile = (fileName: string) => {
+        // Read the file content and seperate the metadata and body sections into their 
+        // own strings.
+        const fileContent = fs.readFileSync(path.join(directoryPath, fileName), 'utf-8');
+        const body = fileContent.replace(METADATA_REGEX, '');
+        const rawMetadata = fileContent.match(METADATA_REGEX)[0];
+
+        markdownFiles.push({
+            fileName: fileName.replace(MARKDOWN_FILE_NAME_REGEX, ''),
+            body: ParseMarkdown.convertContentToHTML(body),
+            metadata: ParseMarkdown.getValuesFromMetadata(rawMetadata)
         });
-    });
+    }
+
+    markdownFileNames.forEach(processMarkdownFile);
+
+    return markdownFiles;
 }
 
 /**
@@ -64,7 +62,7 @@ function createHTMLFile(fileName: string, content: string, outputDir: string): P
  * @param metadata The metadata for the HTML template.
  * @returns The filled out HTML template.
  */
-async function insertIntoHTMLTemplate(body: string, metadata: MetadataEntry[]): Promise<string> {
+function insertIntoHTMLTemplate(body: string, metadata: MetadataEntry[]): string {
     let templateContent = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
     templateContent = templateContent.replace(TEMPLATE_BODY_KEY, body);
     
@@ -73,6 +71,7 @@ async function insertIntoHTMLTemplate(body: string, metadata: MetadataEntry[]): 
     if (title) {
         templateContent = templateContent.replace(TEMPLATE_TITLE_KEY, title.value);
     }
+
     return templateContent;
 }
 
@@ -81,9 +80,9 @@ async function insertIntoHTMLTemplate(body: string, metadata: MetadataEntry[]): 
  * html files in the output directory.
  */
 async function generate() {
-    const markdownFiles = await retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
+    const markdownFiles = retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
     markdownFiles.forEach(async file => {
-        const htmlContent = await insertIntoHTMLTemplate(file.body, file.metadata);
+        const htmlContent = insertIntoHTMLTemplate(file.body, file.metadata);
         createHTMLFile(file.fileName, htmlContent, OUTPUT_DIRECTORY);
     });
 }
