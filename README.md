@@ -32,7 +32,7 @@ Header parsing works exactly how you'd expect. To add a header just start a new 
 ```
 
 ### Custom HTML Elements
-The parsing will wrap any disconnected text blocks in `<p>` tags. There's also support for custom HTML elements in your markdown. If you decide to add one just make sure it's placed on a new line, seperated from any non-HTML text blocks.
+The parsing will wrap any disconnected text blocks in `<p>` tags. There's also support for custom HTML elements in your markdown. If you decide to add one just make sure it's placed on a new line, separated from any non-HTML text blocks.
 
 Good
 ```
