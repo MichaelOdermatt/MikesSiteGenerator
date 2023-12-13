@@ -1,4 +1,7 @@
 # Mike's Site Generator
+
+![MikesSiteGen](https://github.com/MichaelOdermatt/MikesSiteGenerator/assets/43145047/84174ad0-a701-479e-9977-496605da2367)
+
  
 Inspired by [this](https://arne.me/articles/write-your-own-ssg) article.
 
