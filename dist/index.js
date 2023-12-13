@@ -37,14 +37,7 @@ function retreiveMarkdownFiles(directoryPath) {
  * @param outputDir The output directory of the html file.
  */
 function createHTMLFile(fileName, content, outputDir) {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(`${outputDir}/${fileName}.html`, content, err => {
-            if (err) {
-                reject(err);
-            }
-            resolve();
-        });
-    });
+    fs.writeFileSync(`${outputDir}/${fileName}.html`, content);
 }
 /**
  * Inserts values into the base HTML template. Returns the filled out template.

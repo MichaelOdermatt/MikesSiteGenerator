@@ -45,15 +45,8 @@ function retreiveMarkdownFiles(directoryPath: string): MarkdownFile[] {
  * @param content The content for the HTML file.
  * @param outputDir The output directory of the html file.
  */
-function createHTMLFile(fileName: string, content: string, outputDir: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(`${outputDir}/${fileName}.html`, content, err => {
-            if (err) {
-                reject(err);
-            }
-            resolve();
-        });
-    });
+function createHTMLFile(fileName: string, content: string, outputDir: string): void {
+    fs.writeFileSync(`${outputDir}/${fileName}.html`, content);
 }
 
 /**
