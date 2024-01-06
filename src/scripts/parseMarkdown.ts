@@ -83,7 +83,11 @@ export default class ParseMarkdown {
 
             switch (firstSubstringLocation.searchString) {
                 case DOUBLE_LINE_BREAK_REGEX:
-                    output += `<p>${block}</p>`;
+                    // There is a possibility that the block is an empty string. If that's the case
+                    // then don't add it to the output.
+                    if (block.length > 0) {
+                        output += `<p>${block}</p>`;
+                    }
                     content = content.replace(DOUBLE_LINE_BREAK_REGEX, '');
                     break;
                 case HTML_CLOSING_TAG_REGEX:
