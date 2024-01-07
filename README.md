@@ -17,6 +17,9 @@ It'll take all the markdown files in `/markdown`, render them into a basic HTML 
 
 All the markdown parsing is done by the script and thus, is only intended to support very fundamental markdown syntax.
 
+### CSS
+All the css for the site can be put in the `/css` folder in the main directory. When the site is generated every `.css` file in that folder will be copied to `/_site/css` and linked to every generated HTML page. 
+
 ### Page Title
 To define the page's title I added support for a YAML front matter inspired block, which can be added to the top of the page. Here's what it looks like.  
 ```
