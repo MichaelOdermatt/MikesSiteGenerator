@@ -13,7 +13,7 @@ Inspired by [this](https://arne.me/articles/write-your-own-ssg) article.
 
 ## What does it do?
 
-It'll take all the markdown files in `/markdown`, render them into a basic HTML template, then spit out the generated files into the `/_dist` folder.
+It'll take all the markdown files in `/markdown`, render them into a basic HTML template, then output the generated files into the `/_site` folder.
 
 All the markdown parsing is done by the script and thus, is only intended to support very fundamental markdown syntax.
 
