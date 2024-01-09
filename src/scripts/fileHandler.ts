@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { CSS_FILE_NAME_REGEX, MARKDOWN_FILE_NAME_REGEX } from './regex.js';
+import { MARKDOWN_FILE_NAME_REGEX } from './regex.js';
 
 export default class FileHandler {
 
@@ -11,16 +11,6 @@ export default class FileHandler {
     public static retrieveMarkdownFileNames(directoryPath: string): string[] {
         const allFileNames = fs.readdirSync(directoryPath);
         return allFileNames.filter(file => file.match(MARKDOWN_FILE_NAME_REGEX));
-    }
-
-    /**
-     * Returns the fileNames for all the css files in the given directory.
-     * @param directoryPath The directory path that we wish to search.
-     * @returns Returns all css file names in the directory.
-     */
-    public static retrieveCSSFileNames(directoryPath: string): string[] {
-        const allFileNames = fs.readdirSync(directoryPath);
-        return allFileNames.filter(file => file.match(CSS_FILE_NAME_REGEX));
     }
 
     /**

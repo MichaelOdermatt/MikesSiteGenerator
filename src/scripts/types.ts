@@ -1,6 +1,6 @@
 export interface MetadataEntry {
     key: string,
-    value: string,
+    value: string[],
 }
 
 export interface MarkdownFile {

@@ -1,5 +1,6 @@
 ---
 title: Example Page
+stylesheet: ExampleStyles, ExampleStyles2
 ---
 
 ## Header Title

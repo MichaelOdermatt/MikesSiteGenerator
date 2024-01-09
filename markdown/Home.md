@@ -1,5 +1,6 @@
 ---
 title: Home
+stylesheet: ExampleStyles
 ---
 
 ## Pages

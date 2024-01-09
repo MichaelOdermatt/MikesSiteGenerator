@@ -1,10 +1,11 @@
 import path from 'path';
 import { MetadataEntry, MarkdownFile } from './types.js';
 import ParseMarkdown from './parseMarkdown.js';
-import { CSS_FILE_NAME_REGEX, MARKDOWN_FILE_NAME_REGEX, METADATA_REGEX } from './regex.js';
+import { MARKDOWN_FILE_NAME_REGEX, METADATA_REGEX } from './regex.js';
 import { STYLESHEET_ELEMENT_TEMPLATE, TEMPLATE_BODY_KEY, TEMPLATE_FILENAME_KEY, TEMPLATE_STYLESHEET_KEY, TEMPLATE_TITLE_KEY } from './htmlConstants.js';
 import { CSS_DIRECTORY, MARKDOWN_DIRECTORY, OUTPUT_DIRECTORY, TEMPLATE_PATH } from './filePaths.js';
 import FileHandler from './fileHandler.js';
+import StringHelpers from './stringHelpers.js';
 
 /**
  * Returns markdownFile for all the markdown files in the given directory.
@@ -45,32 +46,38 @@ function insertBodyIntoHTMLTemplate(template: string, body: string, metadata: Me
     
     // Add title to the html template if there is a title included in the metadata.
     const title = metadata.find(entry => entry.key === 'title');
+    const stylesheet = metadata.find(entry => entry.key === 'stylesheet');
     if (title) {
-        template = template.replace(TEMPLATE_TITLE_KEY, title.value);
+        StringHelpers.ensureListSizeOne(title.value);
+        const titleString: string = title.value[0];
+        template = template.replace(TEMPLATE_TITLE_KEY, titleString);
+    }
+    if (stylesheet) {
+        StringHelpers.ensureListIsNotEmpty(stylesheet.value);
+        template = addStylesheetsToHTMLTemplate(template, stylesheet.value);
     }
 
     return template;
 }
 
 /**
- * Inserts the stylesheets into the HTML template.
- * @param template The HTML template
+ * Inserts the stylesheets with the given stylsheetNames into the given HTML template.
+ * @param template The HTML template.
+ * @param stylesheetNames The stylesheet file names to add.
  * @returns The HTML template with with the stylesheets added.
  */
-function addStylesheetsToHTMLTemplate(template: string): string {
-    const allFileNames = FileHandler.retrieveCSSFileNames(CSS_DIRECTORY);
+function addStylesheetsToHTMLTemplate(template: string, stylesheetNames: string[]): string {
     let stylesheetElements = '';
 
-    const cssFileNames = allFileNames.filter(file => file.match(CSS_FILE_NAME_REGEX));
     const createStylesheetElement = (fileName: string) => {
         let element = stylesheetElements === '' ? '' : '\n\t';
         element += STYLESHEET_ELEMENT_TEMPLATE.replace(TEMPLATE_FILENAME_KEY, fileName);
         stylesheetElements += element
-        // Copy the file into the _site directory.
-        FileHandler.copyFile(`${CSS_DIRECTORY}/${fileName}`, `${OUTPUT_DIRECTORY}/css/${fileName}`);
+        // Copy the file into the _site/css directory.
+        FileHandler.copyFile(`${CSS_DIRECTORY}/${fileName}.css`, `${OUTPUT_DIRECTORY}/css/${fileName}.css`);
     };
 
-    cssFileNames.forEach(createStylesheetElement);
+    stylesheetNames.forEach(createStylesheetElement);
     return template.replace(TEMPLATE_STYLESHEET_KEY, stylesheetElements);
 }
 
@@ -83,7 +90,6 @@ function generate() {
     markdownFiles.forEach(file => {
         let templateContent = FileHandler.readFile(TEMPLATE_PATH);
         let htmlContent = insertBodyIntoHTMLTemplate(templateContent, file.body, file.metadata);
-        htmlContent = addStylesheetsToHTMLTemplate(htmlContent); 
         FileHandler.writeFile(`${OUTPUT_DIRECTORY}/${file.fileName}.html`, htmlContent);
     });
 }

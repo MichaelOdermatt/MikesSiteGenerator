@@ -15,16 +15,25 @@ export default class ParseMarkdown {
         // Remove the first and last lines which are both '---'
         lines.shift();
         lines.pop();
-        // Split the lines into two segments and trim any whitespaces or unwanted characters
-        // before returning as a metadataEntry object.
-        return lines.map(line => {
-            let segments = line.split(':');
-            segments = segments.map(segment => segment.trim().replace(CLEAN_METADATA_REGEX, ''));
-            return {
-                key: segments[0],
-                value: segments[1],
-            };
-        });
+        return lines.map(ParseMarkdown.processMetadataLine);
+    }
+    /**
+     * Takes the given line, splits it into two segments, trims any whitespace or
+     * unwanted characters. And returns the result.
+     * @param line The line of metadata.
+     * @returns The metadata entry object.
+     */
+    static processMetadataLine(line) {
+        let segments = line.split(':');
+        // Remove any unwanted characters from the metadata's key.
+        const key = segments[0].trim().replace(CLEAN_METADATA_REGEX, '');
+        let values = segments[1].split(',');
+        // Remove any unwanted characters from the metadata's values.
+        values = values.map(value => value.trim().replace(CLEAN_METADATA_REGEX, ''));
+        return {
+            key,
+            value: values
+        };
     }
     /**
      * Translates a string from Markdown header format to HTML header format.
@@ -64,22 +73,28 @@ export default class ParseMarkdown {
                 break;
             }
             const firstSubstringLocation = substringLocations[0];
-            // Get the content of the paragraph block,
-            // then remove that block from the main content string.
+            /**
+             * Get the content of the paragraph block,
+             * then remove that block from the main content string.
+             */
             let block = content.substring(0, firstSubstringLocation.index);
             content = content.replace(block, '');
             switch (firstSubstringLocation.searchString) {
                 case DOUBLE_LINE_BREAK_REGEX:
-                    // There is a possibility that the block is an empty string. If that's the case
-                    // then don't add it to the output.
+                    /**
+                     * There is a possibility that the block is an empty string. If that's the case
+                     * then don't add it to the output.
+                     */
                     if (block.length > 0) {
                         output += `<p>${block}</p>`;
                     }
                     content = content.replace(DOUBLE_LINE_BREAK_REGEX, '');
                     break;
                 case HTML_CLOSING_TAG_REGEX:
-                    // Make sure to add the closing tag to the end of the block,
-                    // as it will be missing the closing tag.
+                    /**
+                     * Make sure to add the closing tag to the end of the block,
+                     * as it will be missing the closing tag.
+                     */
                     block += HTML_CLOSING_TAG_REGEX.exec(content)[0];
                     output += block;
                     content = content.replace(HTML_CLOSING_TAG_REGEX, '');
