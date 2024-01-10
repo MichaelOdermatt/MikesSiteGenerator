@@ -28,9 +28,9 @@ title: {Page Title}
 ```
 
 ### CSS
-Add all your CSS stylesheets to the `/css` folder in the main directory. To link a stylesheet to a page, you use the same YAML-insipired block mentioned above. Use the key `stylesheet` followed by the names of the stylesheets you wish to link to that page. If linking multiple stylesheets, seperate the names with a comma.
+Add all your CSS stylesheets to the `/css` folder in the main directory. To link a stylesheet to a page, you use the same YAML-insipired block mentioned above. Use the key `stylesheet` followed by the names of the stylesheets you wish to link to that page. If linking multiple stylesheets, separate the names with a comma.
 
-_Make sure to ommit the `.css` at the end of the styleshseet names._
+_Make sure to ommit the `.css` at the end of the stylesheet names._
 ```
 ---
 title: {Page Title}
