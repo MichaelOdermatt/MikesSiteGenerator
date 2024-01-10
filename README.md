@@ -17,14 +17,24 @@ It'll take all the markdown files in `/markdown`, render them into a basic HTML 
 
 All the markdown parsing is done by the script and thus, is only intended to support very fundamental markdown syntax.
 
-### CSS
-All the css for the site can be put in the `/css` folder in the main directory. When the site is generated every `.css` file in that folder will be copied to `/_site/css` and linked to every generated HTML page. 
+Examples of all the features listed below can be found in the project's example pages.
 
 ### Page Title
-To define the page's title I added support for a YAML front matter inspired block, which can be added to the top of the page. Here's what it looks like.  
+To define the page's title I added support for a YAML front matter inspired block, which can be added to the top of the page. Here's what it looks like. Just use the key `title` followed by whatever you wish to title the page.
 ```
 ---
 title: {Page Title}
+---
+```
+
+### CSS
+Add all your CSS stylesheets to the `/css` folder in the main directory. To link a stylesheet to a page, you use the same YAML-insipired block mentioned above. Use the key `stylesheet` followed by the names of the stylesheets you wish to link to that page. If linking multiple stylesheets, seperate the names with a comma.
+
+_Make sure to ommit the .css at the end of the styleshset names._
+```
+---
+title: {Page Title}
+stylesheet: {Stylesheet1}, {Stylesheet2}
 ---
 ```
 
