@@ -57,7 +57,7 @@ export default class ParseMarkdown {
 
         const words = line.split(' ');
         const headerSize = words[0].length;
-        const headerContent = line.substring(headerSize + 1);
+        const headerContent = line.substring(headerSize + 1).trim();
 
         return `<h${headerSize}>${headerContent}</h${headerSize}>`
     }
@@ -102,7 +102,7 @@ export default class ParseMarkdown {
                      * then don't add it to the output.
                      */
                     if (block.length > 0) {
-                        output += `<p>${block}</p>`;
+                        output += `<p>${block.trim()}</p>\n`;
                     }
                     content = content.replace(DOUBLE_LINE_BREAK_REGEX, '');
                     break;
@@ -112,7 +112,7 @@ export default class ParseMarkdown {
                      * as it will be missing the closing tag.
                      */
                     block += HTML_CLOSING_TAG_REGEX.exec(content)[0];
-                    output += block;
+                    output += `${block}\n`;
                     content = content.replace(HTML_CLOSING_TAG_REGEX, '');
                     break;
             }
