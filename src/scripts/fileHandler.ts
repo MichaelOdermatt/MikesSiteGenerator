@@ -1,6 +1,9 @@
 import fs from 'fs';
 import { MARKDOWN_FILE_NAME_REGEX } from './regex.js';
 
+/**
+ * Static class containing methods that wrap node.js's fs methods.
+ */
 export default class FileHandler {
 
     /**

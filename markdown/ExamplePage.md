@@ -1,6 +1,7 @@
 ---
 title: Example Page
 stylesheet: ExampleStyles, ExampleStyles2
+scripts: ExampleScript
 ---
 
 ## Header Title

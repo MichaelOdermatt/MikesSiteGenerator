@@ -1,9 +1,9 @@
 import path from 'path';
-import { MetadataEntry, MarkdownFile } from './types.js';
+import { MetadataEntry, MarkdownFile, LinkFileType } from './types.js';
 import ParseMarkdown from './parseMarkdown.js';
 import { MARKDOWN_FILE_NAME_REGEX, METADATA_REGEX } from './regex.js';
-import { STYLESHEET_ELEMENT_TEMPLATE, TEMPLATE_BODY_KEY, TEMPLATE_FILENAME_KEY, TEMPLATE_STYLESHEET_KEY, TEMPLATE_TITLE_KEY } from './htmlConstants.js';
-import { CSS_DIRECTORY, MARKDOWN_DIRECTORY, OUTPUT_DIRECTORY, TEMPLATE_PATH } from './filePaths.js';
+import { SCRIPT_ELEMENT_TEMPLATE, STYLESHEET_ELEMENT_TEMPLATE, TEMPLATE_BODY_KEY, TEMPLATE_FILENAME_KEY, TEMPLATE_SCRIPT_KEY, TEMPLATE_STYLESHEET_KEY, TEMPLATE_TITLE_KEY } from './htmlConstants.js';
+import { CSS_DIRECTORY, CSS_OUTPUT_DIRECTORY, HTML_OUTPUT_DIRECTORY, JS_DIRECTORY, JS_OUTPUT_DIRECTORY, MARKDOWN_DIRECTORY, TEMPLATE_PATH } from './filePaths.js';
 import FileHandler from './fileHandler.js';
 import StringHelpers from './stringHelpers.js';
 
@@ -47,38 +47,55 @@ function insertBodyIntoHTMLTemplate(template: string, body: string, metadata: Me
     // Add title to the html template if there is a title included in the metadata.
     const title = metadata.find(entry => entry.key === 'title');
     const stylesheet = metadata.find(entry => entry.key === 'stylesheet');
+    const script = metadata.find(entry => entry.key === 'scripts');
     if (title) {
         StringHelpers.ensureListSizeOne(title.value);
         const titleString: string = title.value[0];
         template = template.replace(TEMPLATE_TITLE_KEY, titleString);
     }
+
     if (stylesheet) {
         StringHelpers.ensureListIsNotEmpty(stylesheet.value);
-        template = addStylesheetsToHTMLTemplate(template, stylesheet.value);
+        template = addFileLinkToHTMLTemplate(template, stylesheet.value, LinkFileType.css);
+    } else {
+        template.replace(TEMPLATE_STYLESHEET_KEY, '');
+    }
+
+    if (script) {
+        StringHelpers.ensureListIsNotEmpty(script.value);
+        template = addFileLinkToHTMLTemplate(template, script.value, LinkFileType.js);
+    } else {
+        template = template.replace(TEMPLATE_SCRIPT_KEY, '');
     }
 
     return template;
 }
 
 /**
- * Inserts the stylesheets with the given stylsheetNames into the given HTML template.
+ * Inserts the link elements with the given file names into the given HTML template.
  * @param template The HTML template.
- * @param stylesheetNames The stylesheet file names to add.
- * @returns The HTML template with with the stylesheets added.
+ * @param fileNames The stylesheet file names to add.
+ * @param fileType The type of the file to add as a link to the html template.
+ * @returns The HTML template with with the link elements added.
  */
-function addStylesheetsToHTMLTemplate(template: string, stylesheetNames: string[]): string {
-    let stylesheetElements = '';
+function addFileLinkToHTMLTemplate(template: string, fileNames: string[], fileType: LinkFileType): string {
+    const linkElementTemplate = fileType == LinkFileType.css ? STYLESHEET_ELEMENT_TEMPLATE : SCRIPT_ELEMENT_TEMPLATE;
+    const fileDirectory = fileType == LinkFileType.css ? CSS_DIRECTORY : JS_DIRECTORY;
+    const outputDirectory = fileType == LinkFileType.css ? CSS_OUTPUT_DIRECTORY : JS_OUTPUT_DIRECTORY;
+    const templateKey = fileType == LinkFileType.css ? TEMPLATE_STYLESHEET_KEY : TEMPLATE_SCRIPT_KEY;
+    const fileExtension = fileType == LinkFileType.css ? '.css' : '.js';
+
+    let linkElements = '';
 
     const createStylesheetElement = (fileName: string) => {
-        let element = stylesheetElements === '' ? '' : '\n\t';
-        element += STYLESHEET_ELEMENT_TEMPLATE.replace(TEMPLATE_FILENAME_KEY, fileName);
-        stylesheetElements += element
-        // Copy the file into the _site/css directory.
-        FileHandler.copyFile(`${CSS_DIRECTORY}/${fileName}.css`, `${OUTPUT_DIRECTORY}/css/${fileName}.css`);
+        let element = linkElements === '' ? '' : '\n\t';
+        element += linkElementTemplate.replace(TEMPLATE_FILENAME_KEY, fileName);
+        linkElements += element
+        FileHandler.copyFile(`${fileDirectory}/${fileName}${fileExtension}`, `${outputDirectory}/${fileName}${fileExtension}`);
     };
 
-    stylesheetNames.forEach(createStylesheetElement);
-    return template.replace(TEMPLATE_STYLESHEET_KEY, stylesheetElements);
+    fileNames.forEach(createStylesheetElement);
+    return template.replace(templateKey, linkElements);
 }
 
 /**
@@ -90,7 +107,7 @@ function generate() {
     markdownFiles.forEach(file => {
         let templateContent = FileHandler.readFile(TEMPLATE_PATH);
         let htmlContent = insertBodyIntoHTMLTemplate(templateContent, file.body, file.metadata);
-        FileHandler.writeFile(`${OUTPUT_DIRECTORY}/${file.fileName}.html`, htmlContent);
+        FileHandler.writeFile(`${HTML_OUTPUT_DIRECTORY}/${file.fileName}.html`, htmlContent);
     });
 }
 
