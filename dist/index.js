@@ -63,12 +63,13 @@ function insertBodyIntoHTMLTemplate(template, body, metadata) {
     return template;
 }
 /**
- * Inserts the stylesheets with the given stylsheetNames into the given HTML template.
+ * Inserts the link elements with the given file names into the given HTML template.
  * @param template The HTML template.
- * @param stylesheetNames The stylesheet file names to add.
- * @returns The HTML template with with the stylesheets added.
+ * @param fileNames The stylesheet file names to add.
+ * @param fileType The type of the file to add as a link to the html template.
+ * @returns The HTML template with with the link elements added.
  */
-function addFileLinkToHTMLTemplate(template, stylesheetNames, fileType) {
+function addFileLinkToHTMLTemplate(template, fileNames, fileType) {
     const linkElementTemplate = fileType == LinkFileType.css ? STYLESHEET_ELEMENT_TEMPLATE : SCRIPT_ELEMENT_TEMPLATE;
     const fileDirectory = fileType == LinkFileType.css ? CSS_DIRECTORY : JS_DIRECTORY;
     const outputDirectory = fileType == LinkFileType.css ? CSS_OUTPUT_DIRECTORY : JS_OUTPUT_DIRECTORY;
@@ -79,10 +80,9 @@ function addFileLinkToHTMLTemplate(template, stylesheetNames, fileType) {
         let element = linkElements === '' ? '' : '\n\t';
         element += linkElementTemplate.replace(TEMPLATE_FILENAME_KEY, fileName);
         linkElements += element;
-        // Copy the file into the _site/css directory.
         FileHandler.copyFile(`${fileDirectory}/${fileName}${fileExtension}`, `${outputDirectory}/${fileName}${fileExtension}`);
     };
-    stylesheetNames.forEach(createStylesheetElement);
+    fileNames.forEach(createStylesheetElement);
     return template.replace(templateKey, linkElements);
 }
 /**

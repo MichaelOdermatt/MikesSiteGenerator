@@ -56,14 +56,14 @@ function insertBodyIntoHTMLTemplate(template: string, body: string, metadata: Me
 
     if (stylesheet) {
         StringHelpers.ensureListIsNotEmpty(stylesheet.value);
-        template = addFileLinkToHTMLTemplate(template, stylesheet.value, LinkFileType.css);
+        template = linkFileToHTMLTemplate(template, stylesheet.value, LinkFileType.css);
     } else {
         template.replace(TEMPLATE_STYLESHEET_KEY, '');
     }
 
     if (script) {
         StringHelpers.ensureListIsNotEmpty(script.value);
-        template = addFileLinkToHTMLTemplate(template, script.value, LinkFileType.js);
+        template = linkFileToHTMLTemplate(template, script.value, LinkFileType.js);
     } else {
         template = template.replace(TEMPLATE_SCRIPT_KEY, '');
     }
@@ -72,13 +72,13 @@ function insertBodyIntoHTMLTemplate(template: string, body: string, metadata: Me
 }
 
 /**
- * Inserts the link elements with the given file names into the given HTML template.
+ * Links the specified file to given HTML template.
  * @param template The HTML template.
- * @param fileNames The stylesheet file names to add.
- * @param fileType The type of the file to add as a link to the html template.
+ * @param fileNames The file names to add.
+ * @param fileType The type of the file to link to the html template.
  * @returns The HTML template with with the link elements added.
  */
-function addFileLinkToHTMLTemplate(template: string, fileNames: string[], fileType: LinkFileType): string {
+function linkFileToHTMLTemplate(template: string, fileNames: string[], fileType: LinkFileType): string {
     const linkElementTemplate = fileType == LinkFileType.css ? STYLESHEET_ELEMENT_TEMPLATE : SCRIPT_ELEMENT_TEMPLATE;
     const fileDirectory = fileType == LinkFileType.css ? CSS_DIRECTORY : JS_DIRECTORY;
     const outputDirectory = fileType == LinkFileType.css ? CSS_OUTPUT_DIRECTORY : JS_OUTPUT_DIRECTORY;
