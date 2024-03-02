@@ -9,11 +9,6 @@ export interface MarkdownFile {
     metadata: MetadataEntry[];
 }
 
-export interface SubstringLocation {
-    searchString: string | RegExp;
-    index: number;
-}
-
 export enum LinkFileType {
     js,
     css,

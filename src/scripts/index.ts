@@ -11,11 +11,11 @@ import StringHelpers from './stringHelpers.js';
  * Returns markdownFile for all the markdown files in the given directory.
  * @param directoryPath The directory path that we wish to search.
  */
-function retreiveMarkdownFiles(directoryPath: string): MarkdownFile[] {
+async function retreiveMarkdownFiles(directoryPath: string): Promise<MarkdownFile[]> {
     const markdownFileNames = FileHandler.retrieveMarkdownFileNames(directoryPath);
     const markdownFiles: MarkdownFile[] = [];
 
-    const processMarkdownFile = (fileName: string) => {
+    const processMarkdownFile = async (fileName: string) => {
         // Read the file content and seperate the metadata and body sections into their 
         // own strings.
         const fileContent = FileHandler.readFile(path.join(directoryPath, fileName));
@@ -24,12 +24,12 @@ function retreiveMarkdownFiles(directoryPath: string): MarkdownFile[] {
 
         markdownFiles.push({
             fileName: fileName.replace(MARKDOWN_FILE_NAME_REGEX, ''),
-            body: ParseMarkdown.convertContentToHTML(body),
-            metadata: ParseMarkdown.getValuesFromMetadata(rawMetadata)
+            body: await ParseMarkdown.convertMarkdownToHTML(body),
+            metadata: ParseMarkdown.getMetadataEntries(rawMetadata)
         });
     }
 
-    markdownFileNames.forEach(processMarkdownFile);
+    markdownFileNames.forEach(await processMarkdownFile);
 
     return markdownFiles;
 }
@@ -102,8 +102,8 @@ function linkFileToHTMLTemplate(template: string, fileNames: string[], fileType:
  * Main function which retrieves all markdown files in the markdown directory and converts them to 
  * html files in the output directory.
  */
-function generate() {
-    const markdownFiles = retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
+async function generate() {
+    const markdownFiles = await retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
     markdownFiles.forEach(file => {
         let templateContent = FileHandler.readFile(TEMPLATE_PATH);
         let htmlContent = insertBodyIntoHTMLTemplate(templateContent, file.body, file.metadata);

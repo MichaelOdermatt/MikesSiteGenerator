@@ -10,10 +10,10 @@ import StringHelpers from './stringHelpers.js';
  * Returns markdownFile for all the markdown files in the given directory.
  * @param directoryPath The directory path that we wish to search.
  */
-function retreiveMarkdownFiles(directoryPath) {
+async function retreiveMarkdownFiles(directoryPath) {
     const markdownFileNames = FileHandler.retrieveMarkdownFileNames(directoryPath);
     const markdownFiles = [];
-    const processMarkdownFile = (fileName) => {
+    const processMarkdownFile = async (fileName) => {
         // Read the file content and seperate the metadata and body sections into their 
         // own strings.
         const fileContent = FileHandler.readFile(path.join(directoryPath, fileName));
@@ -21,11 +21,11 @@ function retreiveMarkdownFiles(directoryPath) {
         const rawMetadata = fileContent.match(METADATA_REGEX)[0];
         markdownFiles.push({
             fileName: fileName.replace(MARKDOWN_FILE_NAME_REGEX, ''),
-            body: ParseMarkdown.convertContentToHTML(body),
-            metadata: ParseMarkdown.getValuesFromMetadata(rawMetadata)
+            body: await ParseMarkdown.convertMarkdownToHTML(body),
+            metadata: ParseMarkdown.getMetadataEntries(rawMetadata)
         });
     };
-    markdownFileNames.forEach(processMarkdownFile);
+    markdownFileNames.forEach(await processMarkdownFile);
     return markdownFiles;
 }
 /**
@@ -48,28 +48,28 @@ function insertBodyIntoHTMLTemplate(template, body, metadata) {
     }
     if (stylesheet) {
         StringHelpers.ensureListIsNotEmpty(stylesheet.value);
-        template = addFileLinkToHTMLTemplate(template, stylesheet.value, LinkFileType.css);
+        template = linkFileToHTMLTemplate(template, stylesheet.value, LinkFileType.css);
     }
     else {
         template.replace(TEMPLATE_STYLESHEET_KEY, '');
     }
     if (script) {
         StringHelpers.ensureListIsNotEmpty(script.value);
-        template = addFileLinkToHTMLTemplate(template, script.value, LinkFileType.js);
+        template = linkFileToHTMLTemplate(template, script.value, LinkFileType.js);
     }
     else {
-        template = template.replace(TEMPLATE_SCRIPT_KEY, '');
+        template = template.replace(TEMPLATE_SCRIPT_KEY, null);
     }
     return template;
 }
 /**
- * Inserts the link elements with the given file names into the given HTML template.
+ * Links the specified file to given HTML template.
  * @param template The HTML template.
- * @param fileNames The stylesheet file names to add.
- * @param fileType The type of the file to add as a link to the html template.
+ * @param fileNames The file names to add.
+ * @param fileType The type of the file to link to the html template.
  * @returns The HTML template with with the link elements added.
  */
-function addFileLinkToHTMLTemplate(template, fileNames, fileType) {
+function linkFileToHTMLTemplate(template, fileNames, fileType) {
     const linkElementTemplate = fileType == LinkFileType.css ? STYLESHEET_ELEMENT_TEMPLATE : SCRIPT_ELEMENT_TEMPLATE;
     const fileDirectory = fileType == LinkFileType.css ? CSS_DIRECTORY : JS_DIRECTORY;
     const outputDirectory = fileType == LinkFileType.css ? CSS_OUTPUT_DIRECTORY : JS_OUTPUT_DIRECTORY;
@@ -89,8 +89,8 @@ function addFileLinkToHTMLTemplate(template, fileNames, fileType) {
  * Main function which retrieves all markdown files in the markdown directory and converts them to
  * html files in the output directory.
  */
-function generate() {
-    const markdownFiles = retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
+async function generate() {
+    const markdownFiles = await retreiveMarkdownFiles(MARKDOWN_DIRECTORY);
     markdownFiles.forEach(file => {
         let templateContent = FileHandler.readFile(TEMPLATE_PATH);
         let htmlContent = insertBodyIntoHTMLTemplate(templateContent, file.body, file.metadata);
