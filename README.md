@@ -9,18 +9,18 @@ Inspired by [this](https://arne.me/articles/write-your-own-ssg) article.
 
 - Store all the markdown files you intend to convert in the `markdown` folder in the main directory.
 - Run the index.js script.
-- Find generated HTML files in the `_site` folder.
+- Find generated HTML files, and any included CSS and JS files in the `_site` folder.
 
 ## What does it do?
 
 It'll take all the markdown files in `/markdown`, render them into a basic HTML template, then output the generated files into the `/_site` folder.
 
-All the markdown parsing is done by the script and thus, is only intended to support very fundamental markdown syntax.
+All the markdown parsing is done by [Marked](https://github.com/markedjs/marked).
 
-Examples of all the features listed below can be found in the project's example pages.
+The markdown files also have support for a [Front Matter](https://jekyllrb.com/docs/front-matter/)-inspired metadata block. The details of the metadata block are listed below.
 
 ### Page Title
-To define the page's title I added support for a YAML front matter inspired block, which can be added to the top of the page. Here's what it looks like. Just use the key `title` followed by whatever you wish to title the page.
+You can define a page's title in the metadata. Just use the key `title` followed by whatever you wish to title the page.
 ```
 ---
 title: {Page Title}
@@ -28,9 +28,9 @@ title: {Page Title}
 ```
 
 ### CSS
-Add all your CSS stylesheets to the `/css` folder in the main directory. To link a stylesheet to a page, you use the same YAML-insipired block mentioned above. Use the key `stylesheet` followed by the names of the stylesheets you wish to link to that page. If linking multiple stylesheets, separate the names with a comma.
+Add all your CSS stylesheets to the `/css` folder in the main directory. To link a stylesheet to a page, you use the metadata block. Use the key `stylesheet` followed by the names of the stylesheets you wish to link to that page. If linking multiple stylesheets, separate the names with a comma.
 
-_Make sure to ommit the `.css` at the end of the stylesheet names._
+_Make sure to ommit the `.css` at the end of the stylesheets names._
 ```
 ---
 title: {Page Title}
@@ -38,36 +38,14 @@ stylesheet: {Stylesheet1}, {Stylesheet2}
 ---
 ```
 
-### Headers
-Header parsing works exactly how you'd expect. To add a header just start a new line with any number of `#`'s. The number of `#`'s specifies the size of the header.  
-```
-# This will be wrapped in an <h1> tag
-## This will be wrapped in an <h2> tag
-### This will be wrapped in an <h3> tag
-... etc
-```
+### JS
+Similarly to adding CSS stylesheets to a markdown file, to add JS scripts, you put all your scripts into the `/scripts` folder in the main directory. To link a script to a page, use the key `scripts` followed by the names of the scripts you wish to link to that page. If linking multiple scripts, separate the names with a comma.
 
-### Custom HTML Elements
-The parsing will wrap any disconnected text blocks in `<p>` tags. There's also support for custom HTML elements in your markdown. If you decide to add one just make sure it's placed on a new line, separated from any non-HTML text blocks.
-
-Good
+_Make sure to ommit the `.js` at the end of the scripts names._
 ```
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-<img src="{image address}"/>
-Morbi vitae felis id sem placerat auctor.
-```
-Bad
-```
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. <img src="{image address}"/>
-Morbi vitae felis id sem placerat auctor.
-```
-
-### Line breaks
-And lastly if you want to start a new paragraph just hit enter twice (two successive line breaks).
-
-```
-{paragraph 1} Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-
-{paragraph 2} Morbi vitae felis id sem placerat auctor.
+---
+title: {Page Title}
+stylesheet: {Stylesheet1}, {Stylesheet2}
+scripts: {Script1}, {Script2}
+---
 ```
