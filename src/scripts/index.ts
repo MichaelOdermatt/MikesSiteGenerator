@@ -13,25 +13,24 @@ import StringHelpers from './stringHelpers.js';
  */
 async function retreiveMarkdownFiles(directoryPath: string): Promise<MarkdownFile[]> {
     const markdownFileNames = FileHandler.retrieveMarkdownFileNames(directoryPath);
-    const markdownFiles: MarkdownFile[] = [];
 
-    const processMarkdownFile = async (fileName: string) => {
+    const processMarkdownFile = async (fileName: string): Promise<MarkdownFile> => {
         // Read the file content and seperate the metadata and body sections into their 
         // own strings.
         const fileContent = FileHandler.readFile(path.join(directoryPath, fileName));
         const body = fileContent.replace(METADATA_REGEX, '');
         const rawMetadata = fileContent.match(METADATA_REGEX)[0];
 
-        markdownFiles.push({
+        return {
             fileName: fileName.replace(MARKDOWN_FILE_NAME_REGEX, ''),
             body: await ParseMarkdown.convertMarkdownToHTML(body),
             metadata: ParseMarkdown.getMetadataEntries(rawMetadata)
-        });
+        };
     }
 
-    markdownFileNames.forEach(await processMarkdownFile);
-
-    return markdownFiles;
+    return await Promise.all(
+        markdownFileNames.map(await processMarkdownFile)
+    );
 }
 
 /**
