@@ -8,7 +8,7 @@ Inspired by [this](https://arne.me/articles/write-your-own-ssg) article.
 ## How does it work?
 
 - Store all the markdown files you intend to convert in the `markdown` folder in the main directory.
-- Run the index.js script.
+- Run the index.js script. Or, using the script in `package.json`, run `npm run exec`.
 - Find generated HTML files, and any included CSS and JS files in the `_site` folder.
 
 ## What does it do?
